@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>의약품 검색 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .user-info {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-input-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .search-input-group input {
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .search-input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: auto;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .results-section {
+            padding: 30px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .back-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .back-button.show {
+            display: block;
+        }
+
+        .back-button:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .results-count {
+            font-size: 18px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .results-count span {
+            color: #667eea;
+            font-size: 24px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .product-link {
+            color: #667eea;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .product-link:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-results svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-results h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .detail-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .detail-label {
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 18px;
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .detail-value.highlight {
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary-modal {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary-modal:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary-modal {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-secondary-modal:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .copy-feedback {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 2000;
+            display: none;
+            animation: slideUpFeedback 0.3s;
+        }
+
+        .copy-feedback.show {
+            display: block;
+        }
+
+        @keyframes slideUpFeedback {
+            from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="user-info">
+            👤 <span id="userName">사용자</span>님 환영합니다
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>💊 웰스팜 CSO 수수료 검색</h1>
+        </div>
+
+        <div class="search-section">
+            <div class="search-grid">
+                <div class="search-input-group">
+                    <label for="productName">제품명</label>
+                    <input type="text" id="productName" placeholder="예: 가바펜틴">
+                </div>
+                <div class="search-input-group">
+                    <label for="ingredient">성분명</label>
+                    <input type="text" id="ingredient" placeholder="예: Gabapentin">
+                </div>
+                <div class="search-input-group">
+                    <label for="company">제약사</label>
+                    <input type="text" id="company" placeholder="예: 한풍제약">
+                </div>
+                <div class="search-input-group">
+                    <button class="search-button" onclick="searchMedicine()">🔍 검색</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header">
+                <div class="results-count">
+                    검색 결과: <span id="resultCount">0</span>개
+                </div>
+                <button id="backButton" class="back-button" onclick="goBack()">
+                    ← 이전 검색으로 돌아가기
+                </button>
+            </div>
+            <div id="resultsContainer">
+                <div class="loading">데이터를 불러오는 중...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상세 정보 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💊 제품 상세 정보</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 동적으로 채워질 내용 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 복사 완료 피드백 -->
+    <div id="copyFeedback" class="copy-feedback">
+        ✅ 복사되었습니다!
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyAbc123...",  // ← 실제 값
+            authDomain: "wellspharm-cso.firebaseapp.com",
+            projectId: "wellspharm-cso",
+            storageBucket: "wellspharm-cso.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let medicineData = [];
+        let searchHistory = [];
+
+        // 인증 확인
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // PC에서 7일 만료 체크
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (!isMobile) {
+                const loginExpiry = localStorage.getItem('loginExpiry');
+                if (loginExpiry) {
+                    const expiryTime = parseInt(loginExpiry);
+                    const now = new Date().getTime();
+                    
+                    if (now > expiryTime) {
+                        // 7일 지났으면 로그아웃
+                        alert('로그인 유효기간이 만료되었습니다. 다시 로그인해주세요.');
+                        localStorage.removeItem('loginExpiry');
+                        await signOut(auth);
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                }
+            }
+
+            // 승인 상태 확인
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (!userDoc.exists() || !userDoc.data().approved) {
+                alert('승인되지 않은 사용자입니다.');
+                await signOut(auth);
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('userName').textContent = user.displayName || user.email;
+            loadMedicineData();
+        });
+
+        async function loadMedicineData() {
+            try {
+                const querySnapshot = await getDocs(collection(db, 'medicines'));
+                medicineData = [];
+                querySnapshot.forEach((doc) => {
+                    medicineData.push(doc.data());
+                });
+                
+                document.getElementById('resultsContainer').innerHTML = `
+                    <div class="no-results">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <h3>검색어를 입력하세요</h3>
+                        <p>제품명, 성분명 또는 제약사를 입력하여 의약품을 검색할 수 있습니다</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('데이터 로드 오류:', error);
+                document.getElementById('resultsContainer').innerHTML = `
+                    <div class="no-results">
+                        <h3>데이터를 불러오는데 실패했습니다</h3>
+                        <p>관리자에게 문의하세요</p>
+                    </div>
+                `;
+            }
+        }
+
+        window.handleLogout = async function() {
+            await signOut(auth);
+            window.location.href = 'index.html';
+        };
+
+        // 엔터 키로 검색
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input[type="text"]');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchMedicine();
+                    }
+                });
+            });
+        });
+
+        window.searchMedicine = function() {
+            const productName = document.getElementById('productName').value.trim();
+            const ingredient = document.getElementById('ingredient').value.trim();
+            const company = document.getElementById('company').value.trim();
+
+            if (!productName && !ingredient && !company) {
+                alert('최소 하나의 검색어를 입력해주세요.');
+                return;
+            }
+
+            if (medicineData.length === 0) {
+                alert('데이터를 로딩중입니다. 잠시 후 다시 시도해주세요.');
+                return;
+            }
+
+            const results = medicineData.filter(item => {
+                const matchProduct = !productName || (item.제품명 && item.제품명.toLowerCase().includes(productName.toLowerCase()));
+                const matchIngredient = !ingredient || (item.성분함량 && item.성분함량.toLowerCase().includes(ingredient.toLowerCase()));
+                const matchCompany = !company || (item.제약사 && item.제약사.toLowerCase().includes(company.toLowerCase()));
+                
+                return matchProduct && matchIngredient && matchCompany;
+            });
+
+            // 정렬
+            if (productName && !ingredient && !company) {
+                results.sort((a, b) => a.제품명.localeCompare(b.제품명, 'ko'));
+            } else if (ingredient && !productName && !company) {
+                results.sort((a, b) => {
+                    const aIng = a.성분함량 || '';
+                    const bIng = b.성분함량 || '';
+                    return aIng.localeCompare(bIng);
+                });
+            } else if (company && !productName && !ingredient) {
+                results.sort((a, b) => {
+                    const companyCompare = a.제약사.localeCompare(b.제약사, 'ko');
+                    if (companyCompare !== 0) return companyCompare;
+                    return a.제품명.localeCompare(b.제품명, 'ko');
+                });
+            } else {
+                results.sort((a, b) => a.제품명.localeCompare(b.제품명, 'ko'));
+            }
+
+            searchHistory = [];
+            document.getElementById('backButton').classList.remove('show');
+            displayResults(results, false);
+        };
+
+        window.searchByIngredient = function(ingredientName) {
+            if (medicineData.length === 0) return;
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            const currentTable = resultsContainer.querySelector('table tbody');
+            
+            if (currentTable) {
+                const currentResults = [];
+                const rows = currentTable.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const productName = cells[0].textContent.trim();
+                    const item = medicineData.find(m => m.제품명 === productName);
+                    if (item) currentResults.push(item);
+                });
+                
+                searchHistory.push(currentResults);
+            }
+
+            const results = medicineData.filter(item => 
+                item.성분함량 && item.성분함량 === ingredientName
+            );
+
+            results.sort((a, b) => {
+                const aFee = a.수수료율 || 0;
+                const bFee = b.수수료율 || 0;
+                return bFee - aFee;
+            });
+
+            displayResults(results, true);
+            document.getElementById('backButton').classList.add('show');
+            
+            // 브라우저 히스토리에 상태 추가
+            window.history.pushState({ type: 'ingredient', ingredientName }, '', `#ingredient-${encodeURIComponent(ingredientName)}`);
+            
+            // 검색 결과 첫 번째 항목이 상단에 오도록 스크롤
+            setTimeout(() => {
+                const resultsSection = document.querySelector('.results-section');
+                if (resultsSection) {
+                    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        };
+
+        window.goBack = function() {
+            if (searchHistory.length === 0) return;
+            const previousResults = searchHistory.pop();
+            displayResults(previousResults, false);
+            
+            if (searchHistory.length === 0) {
+                document.getElementById('backButton').classList.remove('show');
+            }
+            
+            // 브라우저 히스토리 뒤로가기
+            window.history.back();
+        };
+
+        // 브라우저 뒤로가기 버튼 지원
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.type === 'ingredient') {
+                // 뒤로가기 시 자동으로 이전 검색 결과 표시
+                goBack();
+            }
+        });
+
+        function displayResults(results, isIngredientClick = false) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultCount = document.getElementById('resultCount');
+            
+            resultCount.textContent = results.length;
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3>검색 결과가 없습니다</h3>
+                        <p>다른 검색어로 시도해보세요</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>제품명</th>
+                                <th>성분·함량</th>
+                                <th>제약사</th>
+                                <th>효능군</th>
+                                <th>보험코드</th>
+                                <th>보험수가</th>
+                                <th>수수료</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            results.forEach(item => {
+                const 조정수수료율 = item.수수료율 ? (item.수수료율 - 0.02) : 0;
+                const 수수료표시 = (조정수수료율 * 100).toFixed(0) + '%';
+                
+                // 제품명을 클릭하면 상세 정보 모달 표시
+                const productNameHTML = `<strong><a href="#" onclick='showDetailModal(${JSON.stringify(item)}); return false;' class="product-link">${item.제품명 || '-'}</a></strong>`;
+                
+                // 성분명을 클릭하면 동일 성분 검색 (수수료 높은 순)
+                const ingredientHTML = `<a href="#" onclick='searchByIngredient("${item.성분함량}"); return false;' class="product-link">${item.성분함량 || '-'}</a>`;
+                
+                tableHTML += `
+                    <tr>
+                        <td>${productNameHTML}</td>
+                        <td>${ingredientHTML}</td>
+                        <td>${item.제약사 || '-'}</td>
+                        <td>${item.소분류 || '-'}</td>
+                        <td>${item.제품코드 || '-'}</td>
+                        <td>${item.약가 ? item.약가.toLocaleString() + '원' : '-'}</td>
+                        <td><strong>${수수료표시}</strong></td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `</tbody></table></div>`;
+            resultsContainer.innerHTML = tableHTML;
+        }
+
+        // 상세 정보 모달 표시
+        window.showDetailModal = function(item) {
+            const modal = document.getElementById('detailModal');
+            const modalBody = document.getElementById('modalBody');
+            
+            const 조정수수료율 = item.수수료율 ? (item.수수료율 - 0.02) : 0;
+            const 수수료표시 = (조정수수료율 * 100).toFixed(0) + '%';
+            
+            modalBody.innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">약효분류</div>
+                    <div class="detail-value">${item.소분류 || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">제약사</div>
+                    <div class="detail-value">${item.제약사 || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">제품명</div>
+                    <div class="detail-value highlight">${item.제품명 || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">성분명</div>
+                    <div class="detail-value">${item.성분함량 || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">보험수가</div>
+                    <div class="detail-value">${item.약가 ? item.약가.toLocaleString() + '원' : '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">보험코드</div>
+                    <div class="detail-value">${item.제품코드 || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">수수료율</div>
+                    <div class="detail-value highlight">${수수료표시}</div>
+                </div>
+                <div class="modal-actions">
+                    <button class="action-btn btn-primary-modal" onclick="searchDrugInfo('${item.제품명}')">
+                        🔍 약학정보원 검색
+                    </button>
+                    <button class="action-btn btn-secondary-modal" onclick="copyProductInfo(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                        📋 내용 복사
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        };
+
+        // 모달 닫기
+        window.closeModal = function() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.remove('show');
+        };
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // 약학정보원 검색
+        window.searchDrugInfo = function(productName) {
+            // 약학정보원 메인 검색 페이지로 이동
+            const searchUrl = `https://www.health.kr/search.asp?kwd=${encodeURIComponent(productName)}`;
+            window.open(searchUrl, '_blank');
+        };
+
+        // 제품 정보 복사
+        window.copyProductInfo = function(item) {
+            const copyText = `제약사 : ${item.제약사 || '-'}
+제품명 : ${item.제품명 || '-'}
+보험수가 : ${item.약가 ? item.약가.toLocaleString() + '원' : '-'}
+보험코드 : ${item.제품코드 || '-'}`;
+
+            // 클립보드에 복사
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(copyText).then(() => {
+                    showCopyFeedback();
+                }).catch(err => {
+                    // 폴백: 구식 방법
+                    fallbackCopy(copyText);
+                });
+            } else {
+                // 폴백: 구식 방법
+                fallbackCopy(copyText);
+            }
+        };
+
+        // 구식 복사 방법 (모바일 대응)
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '-9999px';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showCopyFeedback();
+            } catch (err) {
+                alert('복사에 실패했습니다. 수동으로 복사해주세요.');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // 복사 완료 피드백
+        function showCopyFeedback() {
+            const feedback = document.getElementById('copyFeedback');
+            feedback.classList.add('show');
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
