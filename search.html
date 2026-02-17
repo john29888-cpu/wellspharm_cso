@@ -682,9 +682,6 @@
             displayResults(results, true);
             document.getElementById('backButton').classList.add('show');
             
-            // 브라우저 히스토리에 상태 추가
-            window.history.pushState({ type: 'ingredient', ingredientName }, '', `#ingredient-${encodeURIComponent(ingredientName)}`);
-            
             // 검색 결과 첫 번째 항목이 상단에 오도록 스크롤
             setTimeout(() => {
                 const resultsSection = document.querySelector('.results-section');
@@ -702,16 +699,16 @@
             if (searchHistory.length === 0) {
                 document.getElementById('backButton').classList.remove('show');
             }
-            
-            // 브라우저 히스토리 뒤로가기
-            window.history.back();
         };
 
         // 브라우저 뒤로가기 버튼 지원
         window.addEventListener('popstate', function(event) {
-            if (event.state && event.state.type === 'ingredient') {
-                // 뒤로가기 시 자동으로 이전 검색 결과 표시
-                goBack();
+            if (searchHistory.length > 0) {
+                const previousResults = searchHistory.pop();
+                displayResults(previousResults, false);
+                if (searchHistory.length === 0) {
+                    document.getElementById('backButton').classList.remove('show');
+                }
             }
         });
 
@@ -845,7 +842,7 @@
         // 약학정보원 검색
         window.searchDrugInfo = function(productName) {
             // 약학정보원 메인 검색 페이지로 이동
-            const searchUrl = `https://www.health.kr/search.asp?kwd=${encodeURIComponent(productName)}`;
+            const searchUrl = `https://www.health.kr/searchDrug/search_detail.asp?drug_nm=${encodeURIComponent(productName)}`;
             window.open(searchUrl, '_blank');
         };
 
