@@ -296,7 +296,7 @@
 
         // Firebase 설정
         const firebaseConfig = {
-            apiKey: "AIzaSyDUKRghcAAYZoYShaKK0LxzBFH-4Ro_McY",
+            apiKey: "AIzaSyDUKRghcAAYZoYShaKKOLxzBFH-4Ro_McY",
             authDomain: "wellspharm-cso.firebaseapp.com",
             projectId: "wellspharm-cso",
             storageBucket: "wellspharm-cso.firebasestorage.app",
@@ -427,7 +427,7 @@
                 await auth.signOut();
                 
                 // 폼 초기화
-                document.getElementById('signupForm').reset();
+                const signupFormEl = document.querySelector('#signupForm form'); if (signupFormEl) signupFormEl.reset();
                 
                 // 3초 후 로그인 탭으로 전환
                 setTimeout(() => {
