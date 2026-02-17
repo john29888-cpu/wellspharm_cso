@@ -4,6 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>의약품 검색 시스템 - 로그인</title>
+    
+    <!-- 포맷팅 함수 먼저 정의 -->
+    <script>
+        // 핸드폰번호 자동 포맷팅
+        function formatPhone(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            
+            let formatted = '';
+            if (value.length <= 3) {
+                formatted = value;
+            } else if (value.length <= 7) {
+                formatted = value.slice(0, 3) + '-' + value.slice(3);
+            } else {
+                formatted = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7);
+            }
+            input.value = formatted;
+        }
+
+        // 사업자번호 자동 포맷팅
+        function formatBusinessNumber(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            if (value.length > 10) value = value.slice(0, 10);
+            
+            let formatted = '';
+            if (value.length <= 3) {
+                formatted = value;
+            } else if (value.length <= 5) {
+                formatted = value.slice(0, 3) + '-' + value.slice(3);
+            } else {
+                formatted = value.slice(0, 3) + '-' + value.slice(3, 5) + '-' + value.slice(5);
+            }
+            input.value = formatted;
+        }
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -231,7 +267,7 @@
                     </div>
                     <div class="form-group">
                         <label for="signupPhone">핸드폰번호 *</label>
-                        <input type="tel" id="signupPhone" required placeholder="010-0000-0000" maxlength="13" oninput="formatPhone(this)">
+                        <input type="tel" id="signupPhone" required placeholder="010-0000-0000" maxlength="13">
                         <div class="help-text">숫자만 입력하면 자동으로 하이픈이 추가됩니다</div>
                     </div>
                     <div class="form-group">
@@ -240,7 +276,7 @@
                     </div>
                     <div class="form-group">
                         <label for="signupBusinessNumber">사업자번호 *</label>
-                        <input type="text" id="signupBusinessNumber" required placeholder="000-00-00000" maxlength="12" oninput="formatBusinessNumber(this)">
+                        <input type="text" id="signupBusinessNumber" required placeholder="000-00-00000" maxlength="12">
                         <div class="help-text">숫자만 입력하면 자동으로 하이픈이 추가됩니다</div>
                     </div>
                     <button type="submit" class="btn btn-primary">회원가입</button>
@@ -461,6 +497,24 @@
             
             input.value = formatted;
         }
+
+        // 페이지 로드 후 이벤트 리스너 추가
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('signupPhone');
+            const businessInput = document.getElementById('signupBusinessNumber');
+            
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function() {
+                    formatPhone(this);
+                });
+            }
+            
+            if (businessInput) {
+                businessInput.addEventListener('input', function() {
+                    formatBusinessNumber(this);
+                });
+            }
+        });
 
         window.switchTab = function(tab) {
             // 탭 활성화
