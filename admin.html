@@ -401,17 +401,20 @@
 
                 let uploadedCount = 0;
                 
-                // 기존 데이터 삭제
+                // 기존 데이터 삭제 (병렬 처리)
+                statusDiv.textContent = '기존 데이터 삭제 중...';
                 const existingDocs = await getDocs(collection(db, 'medicines'));
-                for (const docSnapshot of existingDocs.docs) {
-                    await deleteDoc(doc(db, 'medicines', docSnapshot.id));
-                }
+                const deletePromises = existingDocs.docs.map(docSnapshot => 
+                    deleteDoc(doc(db, 'medicines', docSnapshot.id))
+                );
+                await Promise.all(deletePromises);
 
-                // 새 데이터 업로드
+                // 새 데이터 수집
+                const medicineList = [];
                 for (let i = 7; i < jsonData.length; i++) {
                     const row = jsonData[i];
                     if (row[5]) {
-                        const medicineData = {
+                        medicineList.push({
                             분류: row[1],
                             대분류: row[2],
                             소분류: row[3],
@@ -422,11 +425,23 @@
                             약가: row[8],
                             제품코드: String(row[9]),
                             수수료율: row[10]
-                        };
-                        
-                        await setDoc(doc(collection(db, 'medicines')), medicineData);
-                        uploadedCount++;
+                        });
                     }
+                }
+
+                // 50개씩 병렬 업로드
+                const batchSize = 50;
+                for (let i = 0; i < medicineList.length; i += batchSize) {
+                    const batch = medicineList.slice(i, i + batchSize);
+                    const uploadPromises = batch.map(medicineData =>
+                        setDoc(doc(collection(db, 'medicines')), medicineData)
+                    );
+                    await Promise.all(uploadPromises);
+                    uploadedCount += batch.length;
+                    
+                    // 진행률 표시
+                    const progress = Math.round((uploadedCount / medicineList.length) * 100);
+                    statusDiv.textContent = `업로드 중... ${uploadedCount}/${medicineList.length}개 (${progress}%)`;
                 }
 
                 statusDiv.className = 'upload-status success';
