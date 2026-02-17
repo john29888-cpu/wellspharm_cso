@@ -400,14 +400,6 @@
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
                 let uploadedCount = 0;
-                
-                // 기존 데이터 삭제 (병렬 처리)
-                statusDiv.textContent = '기존 데이터 삭제 중...';
-                const existingDocs = await getDocs(collection(db, 'medicines'));
-                const deletePromises = existingDocs.docs.map(docSnapshot => 
-                    deleteDoc(doc(db, 'medicines', docSnapshot.id))
-                );
-                await Promise.all(deletePromises);
 
                 // 새 데이터 수집
                 const medicineList = [];
@@ -415,37 +407,37 @@
                     const row = jsonData[i];
                     if (row[5]) {
                         medicineList.push({
-                            분류: row[1],
-                            대분류: row[2],
-                            소분류: row[3],
-                            성분함량: row[4],
-                            제품명: row[5],
-                            제약사: row[6],
-                            대조약: row[7],
-                            약가: row[8],
-                            제품코드: String(row[9]),
-                            수수료율: row[10]
+                            분류: row[1] || '',
+                            대분류: row[2] || '',
+                            소분류: row[3] || '',
+                            성분함량: row[4] || '',
+                            제품명: row[5] || '',
+                            제약사: row[6] || '',
+                            대조약: row[7] || '',
+                            약가: row[8] || '',
+                            제품코드: String(row[9] || ''),
+                            수수료율: row[10] || ''
                         });
+                        uploadedCount++;
                     }
                 }
 
-                // 50개씩 병렬 업로드
-                const batchSize = 10;
-                for (let i = 0; i < medicineList.length; i += batchSize) {
-                    const batch = medicineList.slice(i, i + batchSize);
-                    const uploadPromises = batch.map(medicineData =>
-                        setDoc(doc(collection(db, 'medicines')), medicineData)
-                    );
-                    await Promise.all(uploadPromises);
-                    uploadedCount += batch.length;
-                    
-                    // 진행률 표시
-                    const progress = Math.round((uploadedCount / medicineList.length) * 100);
-                    statusDiv.textContent = `업로드 중... ${uploadedCount}/${medicineList.length}개 (${progress}%)`;
-                }
+                statusDiv.textContent = `총 ${uploadedCount}개 변환 완료! 다운로드 중...`;
 
+                // JSON 파일 다운로드
+                const jsonBlob = new Blob([JSON.stringify(medicineList, null, 2)], {type: 'application/json'});
+                const downloadUrl = URL.createObjectURL(jsonBlob);
+                const downloadBtn = document.createElement('a');
+                downloadBtn.href = downloadUrl;
+                downloadBtn.download = 'data.json';
+                downloadBtn.style.cssText = 'display:inline-block;margin-top:12px;padding:12px 24px;background:#4CAF50;color:white;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;';
+                downloadBtn.textContent = '📥 data.json 다운로드';
+                downloadBtn.click(); // 자동 다운로드
+                
                 statusDiv.className = 'upload-status success';
-                statusDiv.textContent = `✅ ${uploadedCount}개의 의약품 데이터가 업로드되었습니다!`;
+                statusDiv.innerHTML = `✅ ${uploadedCount}개 변환 완료!<br><small style="color:#666">① data.json이 자동 다운로드됩니다<br>② GitHub → data.json 파일 교체<br>③ 1~2분 후 검색 가능!</small>`;
+                statusDiv.appendChild(document.createElement('br'));
+                statusDiv.appendChild(downloadBtn);
                 
             } catch (error) {
                 console.error('업로드 오류:', error);

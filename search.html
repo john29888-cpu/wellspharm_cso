@@ -560,11 +560,10 @@
 
         async function loadMedicineData() {
             try {
-                const querySnapshot = await getDocs(collection(db, 'medicines'));
-                medicineData = [];
-                querySnapshot.forEach((doc) => {
-                    medicineData.push(doc.data());
-                });
+                // data.json에서 로드 (빠름!)
+                const response = await fetch('/data.json');
+                if (!response.ok) throw new Error('data.json 로드 실패');
+                medicineData = await response.json();
                 
                 document.getElementById('resultsContainer').innerHTML = `
                     <div class="no-results">
