@@ -358,9 +358,9 @@
                 
                 // 관리자 여부 확인
                 if (userData.role === 'admin') {
-                    window.location.href = 'admin.html';
+                    window.location.replace('admin.html');
                 } else {
-                    window.location.href = 'search.html';
+                    window.location.replace('search.html');
                 }
                 
             } catch (error) {
