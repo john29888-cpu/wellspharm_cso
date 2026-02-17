@@ -519,6 +519,12 @@
         let medicineData = [];
         let searchHistory = [];
 
+        // 브라우저 뒤로가기로 로그인 화면 이동 방지
+        // 페이지 로드 시 현재 상태를 history에 추가
+        if (!history.state || history.state.page !== 'search') {
+            history.pushState({ page: 'search' }, '', location.href);
+        }
+
         // 인증 확인
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -561,7 +567,7 @@
         async function loadMedicineData() {
             try {
                 // data.json에서 로드 (빠름!)
-                const response = await fetch('/data.json');
+                const response = await fetch('./data.json');
                 if (!response.ok) throw new Error('data.json 로드 실패');
                 medicineData = await response.json();
                 
@@ -644,8 +650,25 @@
                 results.sort((a, b) => a.제품명.localeCompare(b.제품명, 'ko'));
             }
 
-            searchHistory = [];
-            document.getElementById('backButton').classList.remove('show');
+            // 현재 결과가 있으면 history에 저장 (연속 뒤로가기 지원)
+            const resultsContainer = document.getElementById('resultsContainer');
+            const currentTable = resultsContainer.querySelector('table tbody');
+            if (currentTable) {
+                const currentResults = [];
+                const rows = currentTable.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length > 0) {
+                        const pName = cells[0].textContent.trim();
+                        const item = medicineData.find(m => m.제품명 === pName);
+                        if (item) currentResults.push(item);
+                    }
+                });
+                if (currentResults.length > 0) {
+                    searchHistory.push(currentResults);
+                    document.getElementById('backButton').classList.add('show');
+                }
+            }
             displayResults(results, false);
         };
 
@@ -703,6 +726,10 @@
 
         // 브라우저 뒤로가기 버튼 지원
         window.addEventListener('popstate', function(event) {
+            // 항상 현재 페이지 state 유지 (로그인으로 이동 방지)
+            history.pushState({ page: 'search' }, '', location.href);
+
+            // 이전 검색 결과로 복원
             if (searchHistory.length > 0) {
                 const previousResults = searchHistory.pop();
                 displayResults(previousResults, false);
@@ -814,7 +841,7 @@
                 </div>
                 <div class="modal-actions">
                     <button class="action-btn btn-primary-modal" onclick="searchDrugInfo('${item.제품명}')">
-                        🔍 의약품안전나라 검색
+                        🔍 네이버 의약품 검색
                     </button>
                     <button class="action-btn btn-secondary-modal" onclick="copyProductInfo(${JSON.stringify(item).replace(/"/g, '&quot;')})">
                         📋 내용 복사
@@ -839,10 +866,10 @@
             }
         };
 
-        // 의약품안전나라 검색
+        // 네이버 의약품 사전 검색
         window.searchDrugInfo = function(productName) {
-            // 식약처 의약품안전나라 검색 (GET 방식 지원)
-            const searchUrl = `https://nedrug.mfds.go.kr/searchDrug?searchYn=true&itemName=${encodeURIComponent(productName)}`;
+            // 네이버 의약품 사전 (GET 방식 지원)
+            const searchUrl = `https://terms.naver.com/medicineSearch.naver?query=${encodeURIComponent(productName)}`;
             window.open(searchUrl, '_blank');
         };
 
