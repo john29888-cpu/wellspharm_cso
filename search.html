@@ -84,14 +84,28 @@
             border-bottom: 2px solid #e9ecef;
         }
 
+        /* 데스크톱: 입력칸 가로 + 버튼 오른쪽 */
         .search-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            display: flex;
+            flex-direction: row;
             gap: 15px;
+            align-items: flex-end;
             margin-bottom: 20px;
         }
 
+        .search-inputs-col {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+        }
+
+        .search-btn-col {
+            flex-shrink: 0;
+        }
+
         .search-input-group {
+            flex: 1;
             display: flex;
             flex-direction: column;
         }
@@ -460,25 +474,28 @@
                 padding: 12px;
             }
 
-            /* grid: 왼쪽 입력칸 3개 / 오른쪽 검색버튼 */
+            /* 모바일: 입력칸 세로 + 버튼 오른쪽 */
             .search-grid {
-                display: grid;
-                grid-template-columns: 1fr 52px;
-                grid-template-rows: auto auto auto;
+                display: flex;
+                flex-direction: row;
                 gap: 8px;
+                align-items: flex-start;
                 margin-bottom: 0;
             }
 
-            .search-input-group:nth-child(1) { grid-column: 1; grid-row: 1; }
-            .search-input-group:nth-child(2) { grid-column: 1; grid-row: 2; }
-            .search-input-group:nth-child(3) { grid-column: 1; grid-row: 3; }
-
-            /* 검색버튼: 오른쪽 열, 3행 전체 차지 */
-            .search-input-group:nth-child(4) {
-                grid-column: 2;
-                grid-row: 1 / 4;
+            /* 입력칸 묶음: 세로 쌓기, 자기 높이만큼만 */
+            .search-inputs-col {
+                flex: 1;
                 display: flex;
-                align-items: stretch;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            /* 버튼 열: 입력칸 묶음과 같은 높이 */
+            .search-btn-col {
+                flex-shrink: 0;
+                align-self: stretch;
+                display: flex;
             }
 
             .search-input-group label {
@@ -489,12 +506,12 @@
             .search-input-group input {
                 padding: 9px 10px;
                 font-size: 14px;
-                height: auto;         /* 고정 높이 제거 */
             }
 
+            /* 버튼: 부모 높이 100% 채우기 */
             .search-button {
-                width: 100%;
-                height: 100%;
+                width: 50px;
+                flex: 1;
                 padding: 0;
                 font-size: 13px;
                 writing-mode: vertical-lr;
@@ -524,19 +541,21 @@
 
         <div class="search-section">
             <div class="search-grid">
-                <div class="search-input-group">
-                    <label for="productName">제품명</label>
-                    <input type="text" id="productName" placeholder="예: 가바펜틴" enterkeyhint="search">
+                <div class="search-inputs-col">
+                    <div class="search-input-group">
+                        <label for="productName">제품명</label>
+                        <input type="text" id="productName" placeholder="예: 가바펜틴" enterkeyhint="search">
+                    </div>
+                    <div class="search-input-group">
+                        <label for="ingredient">성분명</label>
+                        <input type="text" id="ingredient" placeholder="예: Gabapentin" enterkeyhint="search">
+                    </div>
+                    <div class="search-input-group">
+                        <label for="company">제약사</label>
+                        <input type="text" id="company" placeholder="예: 한풍제약" enterkeyhint="search">
+                    </div>
                 </div>
-                <div class="search-input-group">
-                    <label for="ingredient">성분명</label>
-                    <input type="text" id="ingredient" placeholder="예: Gabapentin" enterkeyhint="search">
-                </div>
-                <div class="search-input-group">
-                    <label for="company">제약사</label>
-                    <input type="text" id="company" placeholder="예: 한풍제약" enterkeyhint="search">
-                </div>
-                <div class="search-input-group">
+                <div class="search-btn-col">
                     <button class="search-button" onclick="searchMedicine()">🔍 검색</button>
                 </div>
             </div>
