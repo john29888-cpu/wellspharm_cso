@@ -317,7 +317,7 @@
         .modal-header {
             background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
             color: white;
-            padding: 25px;
+            padding: 14px 20px;
             border-radius: 20px 20px 0 0;
             display: flex;
             justify-content: space-between;
@@ -325,7 +325,7 @@
         }
 
         .modal-header h3 {
-            font-size: 20px;
+            font-size: 16px;
             margin: 0;
         }
 
@@ -349,12 +349,12 @@
         }
 
         .modal-body {
-            padding: 30px;
+            padding: 14px 20px;
         }
 
         .detail-item {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
             border-bottom: 1px solid #e9ecef;
         }
 
@@ -365,21 +365,21 @@
         }
 
         .detail-label {
-            font-size: 13px;
+            font-size: 11px;
             color: #6c757d;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
 
         .detail-value {
-            font-size: 18px;
+            font-size: 15px;
             color: #212529;
             font-weight: 600;
         }
 
         .detail-value.highlight {
             color: #00BCD4;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .modal-actions {
@@ -539,35 +539,37 @@
             /* 1줄: 제품명 · 성분명 · 제약사 */
             .mrow-top {
                 display: flex;
-                align-items: baseline;
-                gap: 6px;
+                flex-direction: column;
+                gap: 2px;
                 margin-bottom: 4px;
-                flex-wrap: nowrap;
+            }
+            .mrow-line1 {
+                display: flex;
+                align-items: baseline;
+                gap: 5px;
             }
             .mrow-name {
                 font-size: 13px;
                 font-weight: 700;
                 color: #00BCD4;
-                flex: 0 0 auto;
-                max-width: 38%;
+                flex-shrink: 0;
                 word-break: keep-all;
                 line-height: 1.3;
             }
             .mrow-sep { color: #ced4da; font-size: 11px; flex-shrink: 0; }
-            .mrow-ingredient {
-                font-size: 11px;
-                color: #0097A7;
-                flex: 1 1 0;
-                min-width: 0;
-                word-break: break-word;
-                line-height: 1.3;
-                cursor: pointer;
-            }
             .mrow-company {
                 font-size: 11px;
                 color: #495057;
-                flex: 0 0 auto;
+                flex-shrink: 0;
                 white-space: nowrap;
+            }
+            .mrow-ingredient {
+                font-size: 11px;
+                color: #0097A7;
+                word-break: break-word;
+                line-height: 1.3;
+                cursor: pointer;
+                padding-left: 2px;
             }
 
             /* 2줄: 효능군 · 보험코드 · 보험수가 · 수수료 */
@@ -984,13 +986,14 @@
                 cardsHTML += `
                     <div class="mobile-row-item">
                         <div class="mrow-top">
-                            <div class="mrow-name">
-                                <a href="#" onclick='showDetailModal(${JSON.stringify(item)}); return false;' class="product-link">${item.제품명 || '-'}</a>
+                            <div class="mrow-line1">
+                                <div class="mrow-name">
+                                    <a href="#" onclick='showDetailModal(${JSON.stringify(item)}); return false;' class="product-link">${item.제품명 || '-'}</a>
+                                </div>
+                                <span class="mrow-sep">|</span>
+                                <div class="mrow-company">${item.제약사 || '-'}</div>
                             </div>
-                            <span class="mrow-sep">|</span>
                             <div class="mrow-ingredient" onclick='searchByIngredient("${item.성분함량}"); return false;'>${item.성분함량 || '-'}</div>
-                            <span class="mrow-sep">|</span>
-                            <div class="mrow-company">${item.제약사 || '-'}</div>
                         </div>
                         <div class="mrow-bottom">
                             <span class="mrow-badge">${item.소분류 || '-'}</span>
