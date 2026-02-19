@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>의약품 검색 시스템</title>
-    <link rel="icon" type="image/png" href="웰스팜_CI_투명.png">
-    <link rel="apple-touch-icon" href="웰스팜_CI_투명.png">
     <style>
         * {
             margin: 0;
@@ -68,7 +66,7 @@
         }
 
         .header h1 {
-            font-size: 30px;
+            font-size: 28px;
             font-weight: 700;
             margin: 0;
             letter-spacing: -0.5px;
@@ -434,6 +432,81 @@
             from { transform: translateX(-50%) translateY(20px); opacity: 0; }
             to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
+
+        /* ===== 모바일 전용 스타일 ===== */
+        @media (max-width: 768px) {
+
+            .top-bar {
+                padding: 6px 12px;
+                border-radius: 8px;
+                margin-bottom: 8px;
+            }
+            .user-info {
+                font-size: 11px;
+                font-weight: 500;
+                color: #6c757d;
+            }
+            .logout-btn {
+                padding: 4px 10px;
+                font-size: 11px;
+                border-radius: 4px;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .search-section {
+                padding: 12px;
+            }
+
+            /* grid: 왼쪽 입력칸 3개 / 오른쪽 검색버튼 */
+            .search-grid {
+                display: grid;
+                grid-template-columns: 1fr 52px;
+                grid-template-rows: auto auto auto;
+                gap: 8px;
+                margin-bottom: 0;
+            }
+
+            .search-input-group:nth-child(1) { grid-column: 1; grid-row: 1; }
+            .search-input-group:nth-child(2) { grid-column: 1; grid-row: 2; }
+            .search-input-group:nth-child(3) { grid-column: 1; grid-row: 3; }
+
+            /* 검색버튼: 오른쪽 열, 3행 전체 차지 */
+            .search-input-group:nth-child(4) {
+                grid-column: 2;
+                grid-row: 1 / 4;
+                display: flex;
+                align-items: stretch;
+            }
+
+            .search-input-group label {
+                font-size: 12px;
+                margin-bottom: 3px;
+            }
+
+            .search-input-group input {
+                padding: 9px 10px;
+                font-size: 14px;
+                height: auto;         /* 고정 높이 제거 */
+            }
+
+            .search-button {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                font-size: 13px;
+                writing-mode: vertical-lr;
+                letter-spacing: 4px;
+                border-radius: 8px;
+                margin-top: 0;
+            }
+
+            .results-section {
+                padding: 15px 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -446,22 +519,22 @@
 
     <div class="container">
         <div class="header">
-            <h1 style="margin:0; font-size:30px; font-weight:700; letter-spacing:-1px; color:white; text-shadow:0 2px 8px rgba(0,0,0,0.15);">웰스팜 CSO 수수료 검색</h1>
+            <h1 style="margin:0; font-size:28px; font-weight:700; letter-spacing:-1px; color:white; text-shadow:0 2px 8px rgba(0,0,0,0.15);">웰스팜 CSO 수수료 검색</h1>
         </div>
 
         <div class="search-section">
             <div class="search-grid">
                 <div class="search-input-group">
                     <label for="productName">제품명</label>
-                    <input type="text" id="productName" placeholder="예: 가바펜틴">
+                    <input type="text" id="productName" placeholder="예: 가바펜틴" enterkeyhint="search">
                 </div>
                 <div class="search-input-group">
                     <label for="ingredient">성분명</label>
-                    <input type="text" id="ingredient" placeholder="예: Gabapentin">
+                    <input type="text" id="ingredient" placeholder="예: Gabapentin" enterkeyhint="search">
                 </div>
                 <div class="search-input-group">
                     <label for="company">제약사</label>
-                    <input type="text" id="company" placeholder="예: 한풍제약">
+                    <input type="text" id="company" placeholder="예: 한풍제약" enterkeyhint="search">
                 </div>
                 <div class="search-input-group">
                     <button class="search-button" onclick="searchMedicine()">🔍 검색</button>
@@ -675,6 +748,14 @@
                 }
             }
             displayResults(results, false);
+
+            // 검색 결과를 화면 최상단으로 스크롤
+            setTimeout(() => {
+                const resultsSection = document.querySelector('.results-section');
+                if (resultsSection) {
+                    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
         };
 
         window.searchByIngredient = function(ingredientName) {
